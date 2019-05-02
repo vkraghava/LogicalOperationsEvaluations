@@ -12,13 +12,15 @@ public class EvaluationService {
         Expression expression2 = new Expression();
 
         expression1.setExpressionString(GeneralConstants.EXPRESSION_1);
-        expression1.setValue(true);
+        expression1.setValue(false);
         expression2.setExpressionString(GeneralConstants.EXPRESSION_2);
         expression2.setValue(false);
         expression1.setNextExpression(expression2);
         expression1.setOperator(GeneralConstants.OR);
+        expression2.setOperator(GeneralConstants.AND);
+        expression2.setValue(false);
 
-        if(evaluate(expression1)) {
+        if(!BooleanUtils.toBoolean(evaluate(expression1))) {
             System.out.println("Evaluation Worked");
         } else {
             System.out.println("Evaluation did not Work");
@@ -26,17 +28,22 @@ public class EvaluationService {
 
     }
 
-    public static boolean evaluate(Expression expression) {
+    public static int evaluate(Expression expression) {
         int value1 = getIntValue(expression);
-        int value2 = getIntValue(expression.getNextExpression());
+        int value2;
+        if(expression.getNextExpression() != null) {
+          value2 = evaluate(expression.getNextExpression());
+        } else {
+            return value1;
+        }
 
         if (GeneralConstants.AND.equals(expression.getOperator())) {
-           return BooleanUtils.toBoolean(Integer.min(value1, value2));
+           return Integer.min(value1, value2);
         }
         if (GeneralConstants.OR.equals(expression.getOperator())) {
-            return BooleanUtils.toBoolean(Integer.max(value1, value2));
+            return Integer.max(value1, value2);
         }
-        return  false;
+        return  0;
     }
     public static final int getIntValue(Expression expression) {
         return BooleanUtils.toInteger(expression.isValue());
